@@ -17,5 +17,7 @@ metadata:
         app: axis-web
 spec:
     containers:
-        name: axis-container
-        image: rcms/axis:v4
+        - name: axis-container
+          image: rcms/axis:v4
+          ports:
+              - containerPort: 80
