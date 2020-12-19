@@ -26,7 +26,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-    name: axis-Service
+    name: axis-service
     namespace: rcms
     labels:
         client: axis
