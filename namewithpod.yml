@@ -1,0 +1,21 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+    name: rcms
+    labels:
+        dept: it
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+    name: rcms-web-server
+    namespace: rcms
+    labels:
+        client: axis
+        app: axis-web
+spec:
+    containers:
+        name: axis-container
+        image: rcms/axis:v4
