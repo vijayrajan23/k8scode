@@ -262,5 +262,6 @@ The Kubernetes Controller Manager leverages a key pair to generate and sign serv
 # Distribute the Client and Server Certificates
 
 ## Copy the appropriate certificates and private keys to each worker nodes: 
+- copy These file workernode and kube-proxy = wokernode
 ## Copy the appropriate certificates and private keys to each controller :
-
+- copy admin.kubeconfig kube-controller-manager.kubeconfig kube-scheduler.kubeconfig = masternode
