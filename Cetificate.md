@@ -262,4 +262,6 @@ The Kubernetes Controller Manager leverages a key pair to generate and sign serv
 # Distribute the Client and Server Certificates
 
 ## Copy the appropriate certificates and private keys to each worker nodes: 
+- copy ca.pem workernode-key.pem workernode.pem to workernode
 ## Copy the appropriate certificates and private keys to each controller :
+- copy ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem service-account-key.pem service-account.pem copy to masternode. 
