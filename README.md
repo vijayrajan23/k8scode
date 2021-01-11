@@ -19,3 +19,5 @@
 - Refer to certificate.md and certificate folders.
 #  Kubeconfig 
 - Refer to kubeconfig.md
+# Data Encryption
+- Refer to Data_Encryption.md
