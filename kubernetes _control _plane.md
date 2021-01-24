@@ -243,3 +243,216 @@ WantedBy=multi-user.target
   sudo systemctl enable kube-apiserver kube-controller-manager kube-scheduler
   
   sudo systemctl start kube-apiserver kube-controller-manager kube-scheduler
+
+## Enable HTTP Health Checks
+
+Install a basic web server to handle HTTP health checks:
+
+sudo apt-get update
+
+sudo apt-get install -y nginx
+
+cat > kubernetes.default.svc.cluster.local <<EOF
+
+server {
+
+  listen      80;
+
+  server_name kubernetes.default.svc.cluster.local;
+
+  location /healthz {
+
+     proxy_pass                    https://127.0.0.1:6443/healthz;
+
+     proxy_ssl_trusted_certificate /var/lib/kubernetes/ca.pem;
+
+  }
+
+}
+
+EOF
+
+{
+ 
+  sudo mv kubernetes.default.svc.cluster.local \
+     /etc/nginx/sites-available/kubernetes.default.svc.cluster.local
+
+  sudo ln -s /etc/nginx/sites-available/kubernetes.default.svc.cluster.local /etc/nginx/sites-enabled/
+
+}
+
+sudo systemctl restart nginx
+
+sudo systemctl enable nginx
+
+## Verification
+
+kubectl get componentstatuses --kubeconfig admin.kubeconfig
+
+## output
+
+NAME                 STATUS    MESSAGE             ERROR
+
+scheduler            Healthy   ok
+
+controller-manager   Healthy   ok
+
+etcd-0               Healthy   {"health":"true"}
+
+etcd-1               Healthy   {"health":"true"}
+
+etcd-2               Healthy   {"health":"true"}
+
+## Test the nginx HTTP health check proxy:
+
+curl -H "Host: kubernetes.default.svc.cluster.local" -i http://127.0.0.1/healthz
+
+HTTP/1.1 200 OK
+
+Server: nginx/1.18.0 (Ubuntu)
+
+Date: Sat, 18 Jul 2020 06:20:48 GMT
+
+Content-Type: text/plain; charset=utf-8
+
+Content-Length: 2
+
+Connection: keep-alive
+
+Cache-Control: no-cache, private
+
+X-Content-Type-Options: nosniff
+
+ok
+
+## RBAC for Kubelet Authorization
+
+- In this section you will configure RBAC permissions to allow the Kubernetes API Server to access the Kubelet API on each worker node. Access to the Kubelet API is required for retrieving metrics, logs, and executing commands in pods.
+
+- The commands in this section will effect the entire cluster and only need to be run once from one of the controller nodes.
+
+- Create the system:kube-apiserver-to-kubelet ClusterRole with permissions to access the Kubelet API and perform most common tasks associated with managing pods
+
+cat <<EOF | kubectl apply --kubeconfig admin.kubeconfig -f -
+
+apiVersion: rbac.authorization.k8s.io/v1beta1
+
+kind: ClusterRole
+
+metadata:
+
+  annotations:
+
+    rbac.authorization.kubernetes.io/autoupdate: "true"
+
+  labels:
+
+    kubernetes.io/bootstrapping: rbac-defaults
+
+  name: system:kube-apiserver-to-kubelet
+
+rules:
+
+  - apiGroups:
+
+      - ""
+
+    resources:
+
+      - nodes/proxy
+
+      - nodes/stats
+
+      - nodes/log
+
+      - nodes/spec
+
+      - nodes/metrics
+
+    verbs:
+
+      - "*"
+
+EOF
+
+- The Kubernetes API Server authenticates to the Kubelet as the kubernetes user using the client certificate as defined by the --kubelet-client-certificate flag.
+
+- Bind the system:kube-apiserver-to-kubelet ClusterRole to the kubernetes user:
+
+cat <<EOF | kubectl apply --kubeconfig admin.kubeconfig -f -
+
+apiVersion: rbac.authorization.k8s.io/v1beta1
+
+kind: ClusterRoleBinding
+
+metadata:
+
+  name: system:kube-apiserver
+
+  namespace: ""
+
+roleRef:
+
+  apiGroup: rbac.authorization.k8s.io
+
+  kind: ClusterRole
+
+  name: system:kube-apiserver-to-kubelet
+
+subjects:
+
+  - apiGroup: rbac.authorization.k8s.io
+
+    kind: User
+
+    name: kubernetes
+
+EOF
+
+## The Kubernetes Frontend Load Balancer:
+
+- Configure the loadbalancer nginx or haproxy.
+
+* install nginx and haporxy
+
+== Configure nginx and haporxy
+
+vim /etc/nginx/conf.d/kubernetes.conf
+stream {
+  upstream kubernetes {
+    server {masterip1:6443}
+    server {masterip2:6443}
+  }
+  server {
+    listen 6443;
+    listen 443;
+    proxy_pass kubernetes;
+  }
+}
+
+# output 
+
+curl -k https://localhost:6443/version
+  
+{
+  
+  "major": "1",
+  
+  "minor": "18",
+  
+  "gitVersion": "v1.18.6",
+  
+  "gitCommit": "dff82dc0de47299ab66c83c626e08b245ab19037",
+  
+  "gitTreeState": "clean",
+  
+  "buildDate": "2020-07-15T16:51:04Z",
+  
+  "goVersion": "go1.13.9",
+  
+  "compiler": "gc",
+  
+  "platform": "linux/amd64"
+
+}
+
