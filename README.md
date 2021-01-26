@@ -23,3 +23,9 @@
 - Refer to Data_Encryption.md
 # creating etcd clusers.
 - Refer to etcd.md
+# Creating kubernetes controllers.
+- Refer to kubernetes_control_plane.mkdir
+# Creating kubernetes workers.
+- Refer to kubernetes_work_node.md
+# Creating kubernetes Remote access.
+- Refer to kubernetes_Remote_acces.md
