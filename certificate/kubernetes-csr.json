@@ -1,16 +1,16 @@
 {
-    "CN": "kubernetes",
-    "key": {
-        "algo": "rsa",
-        "size": 2048
-    },
-    "names": [
-        {
-            "C": "IN",
-            "L": "Chennai",
-            "O": "Kubernetes",
-            "OU": "IT",
-            "ST": "Tamilnadu"
-        }
-    ]
+  "CN": "kubernetes",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "L": "Portland",
+      "O": "Kubernetes",
+      "OU": "Kubernetes The Hard Way",
+      "ST": "Oregon"
+    }
+  ]
 }
