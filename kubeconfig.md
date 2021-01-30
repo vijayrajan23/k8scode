@@ -1,24 +1,24 @@
 # Generating Kubernetes Configuration Files for Authentication
-
 #  Client Authentication Configs
 - A Kubernetes configuration or kubeconfig  is that stores information about clusters, users, namesapce, pods, services and authentication meschanisms, (I) Location  of the cluster you want to connect, (II) what user you want to authenticate, (III) Data needed in order to authenticate, such as tokens or client certificates.
-
 # Kubeconfig generate.
-- kubelet (one for each worker node)
-- kube proxy
-- kube-controller-manager
-- kube-scheduler
-- Admin
+```* kubelet *** (for each worker node) ```
+```* kube proxy ```
+```* kube-controller-manager ```
+```* kube-scheduler ```
+```* Admin```
 ## kubeconfig file generate
-- file path = certificate path.
 ## Generating kubeconfig for kubelet all worker nodes.
-- In This scenario the worknode kubelet and kube-proxy not connect directly controller, its connting via kube-API-loadbalancer (nginx).
-## code
-for instance in workernodes; do
+In This scenario the worknode kubelet and kube-proxy not connect directly controller, its connting via kube-API-loadbalancer (nginx).
+### Command use generate ConfigFile. 
+```
+ KUBERNETES_ADDRESS=192.168.5.104
+
+for instance in  worker1.mylap.in worker2.mylap.in; do
   kubectl config set-cluster kubernetes-the-hard-way \
     --certificate-authority=ca.pem \
     --embed-certs=true \
-    --server=https://${kube-API-loadbalancer-IP}:6443 \
+    --server=https://${KUBERNETES_ADDRESS}:6443 \
     --kubeconfig=${instance}.kubeconfig
 
   kubectl config set-credentials system:node:${instance} \
@@ -34,17 +34,21 @@ for instance in workernodes; do
 
   kubectl config use-context default --kubeconfig=${instance}.kubeconfig
 done
-### sample output
-- workernodes.kubeconfig
+```
+### Results
+```
+worker1.mylap.in.kubeconfig
+worker2.mylap.in.kubeconfig
+```
 # The kube-proxy Kubernetes Configuration File
-
 ## Generate a kubeconfig file for the kube-proxy service:
-## code
+### Command use generate ConfigFile.
+```
 {
   kubectl config set-cluster kubernetes-the-hard-way \
     --certificate-authority=ca.pem \
     --embed-certs=true \
-    --server=https://${kube-API-loadbalancer-IP}:6443 \
+    --server=https://${KUBERNETES_ADDRESS}:6443 \
     --kubeconfig=kube-proxy.kubeconfig
 
   kubectl config set-credentials system:kube-proxy \
@@ -60,14 +64,16 @@ done
 
   kubectl config use-context default --kubeconfig=kube-proxy.kubeconfig
 }
-### sample Output
-- kube-proxy.kubeconfig
-
+```
+### Results
+```
+kube-proxy.kubeconfig
+```
 # The kube-controller-manager Kubernetes Configuration File
-
 ## Generate a kubeconfig file for the kube-controller-manager service:
-- kube-controller-manager connectiong via kube-API-server same controller use localloop ip 
-## code
+ kube-controller-manager connectiong via kube-API-server same controller use localloop ip 
+## Command use generate ConfigFile.
+```
 {
   kubectl config set-cluster kubernetes-the-hard-way \
     --certificate-authority=ca.pem \
@@ -88,14 +94,16 @@ done
 
   kubectl config use-context default --kubeconfig=kube-controller-manager.kubeconfig
 }
-### sample output
-- kube-controller-manager.kubeconfig
-
+```
+### Results
+```
+kube-controller-manager.kubeconfig
+```
 # The kube-scheduler Kubernetes Configuration File
-
 ## Generate a kubeconfig file for the kube-scheduler service:
-- kube-scheduler get instruction etcd same controller use localloop ip
-## code
+kube-scheduler get instruction etcd same controller use localloop ip
+## Command use generate ConfigFile.
+```
 {
   kubectl config set-cluster kubernetes-the-hard-way \
     --certificate-authority=ca.pem \
@@ -116,13 +124,15 @@ done
 
   kubectl config use-context default --kubeconfig=kube-scheduler.kubeconfig
 }
-### sample output
-- kube-scheduler.kubeconfig
-
+```
+### Results
+```
+kube-scheduler.kubeconfig
+```
 # The admin Kubernetes Configuration File
-
 ## Generate a kubeconfig file for the admin user:
-## code
+## Command use generate ConfigFile.
+```
 {
   kubectl config set-cluster kubernetes-the-hard-way \
     --certificate-authority=ca.pem \
@@ -143,10 +153,26 @@ done
 
   kubectl config use-context default --kubeconfig=admin.kubeconfig
 }
-### sample output
-- admin.kubeconfig
+```
+### Results
+``` admin.kubeconfig ```
 #  Distribute the Kubernetes Configuration Files
-- worker node
-- copy these configfiles workernode.kubeconfig, kube-proxy.kubeconfig to workernode.
-- Controller node
-- copy these configfiles admin.kubeconfig, kube-controller-manager.kubeconfig, kube-scheduler.kubeconfig to controllernode.
+```* worker node ```
+```* copy these configfiles workernode.kubeconfig, kube-proxy.kubeconfig to workernode. ```
+```* Controller node ```
+```* copy these configfiles admin.kubeconfig, kube-controller-manager.kubeconfig, kube-scheduler.kubeconfig to controllernode. ```
+```
+#!/bin/bash
+# wokernode certificates move
+for instance in worker1.mylap.in worker2.mylap.in; do
+  scp  ${instance}.kubeconfig kube-proxy.kubeconfig  user@${instance}:~/k8s/
+done
+```
+
+```
+#!/bin/bash
+# master certificates move
+for instance in master1.mylap.in master2.mylap.in; do
+  scp admin.kubeconfig kube-controller-manager.kubeconfig kube-scheduler.kubeconfig	  ubuntu@${instance}:~/k8s/
+done
+```

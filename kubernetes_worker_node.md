@@ -4,16 +4,14 @@
 - The Kubernetes nodes has the services necessary to run application containers and be managed from the master system.
 
 ## kubernetes worker node components
-* kubelet : kubelet is a kubernetes agent. It controls each worker node, providing the API that are used by the control plane to manage nodes and pods, and inertacts with the container runtime to manage containers.
-* Kube-proxy: Manages iptabales rules on the node to provide virtual network access to pods.
-* Container runtime: 
-
+```* kubelet ``` kubelet is a kubernetes agent. It controls each worker node, providing the API that are used by the control plane to manage nodes and pods, and inertacts with the container runtime to manage containers.
+```* Kube-proxy ``` Manages iptabales rules on the node to provide virtual network access to pods.
+```* Container runtime ``` 
 ## Provisioning a Kubernetes Worker Node.
-
+```
   sudo apt-get update
-  
   sudo apt-get -y install socat conntrack ipset
-
+```
 ## disable swap
 
   sudo swapoff -a
