@@ -25,7 +25,8 @@ sudo swapoff -a
 ```
 
 ## Download and Install Worker Binaries.
-```wget -q --show-progress --https-only --timestamping \
+```
+wget -q --show-progress --https-only --timestamping \
   https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.20.0/crictl-v1.20.0-linux-amd64.tar.gz \
   https://github.com/opencontainers/runc/releases/download/v1.0.0-rc91/runc.amd64 \
   https://github.com/containernetworking/plugins/releases/download/v0.8.6/cni-plugins-linux-amd64-v0.8.6.tgz \
@@ -54,6 +55,40 @@ sudo mkdir -p \
   chmod +x crictl kubectl kube-proxy kubelet runc 
   sudo mv crictl kubectl kube-proxy kubelet runc /usr/local/bin/
   sudo mv containerd/bin/* /bin/
+```
+# Create CNI(Container Network Interface)
+```  
+  POD_CIDR=172.16.0.0/28
+```
+#Create the bridge network configuration file:
+```
+   cat <<EOF | sudo tee /etc/cni/net.d/10-bridge.conf
+{
+    "cniVersion": "0.3.1",
+    "name": "bridge",
+    "type": "bridge",
+    "bridge": "cnio0",
+    "isGateway": true,
+    "ipMasq": true,
+    "ipam": {
+        "type": "host-local",
+        "ranges": [
+          [{"subnet": "${POD_CIDR}"}]
+        ],
+        "routes": [{"dst": "0.0.0.0/0"}]
+    }
+}
+EOF
+```
+#Create the loopback network configuration file:
+```  
+   cat <<EOF | sudo tee /etc/cni/net.d/99-loopback.conf
+{
+    "cniVersion": "0.3.1",
+    "name": "lo",
+    "type": "loopback"
+}
+EOF
 ```
   ## Configure containerd
   Create the containerd configuration file:
