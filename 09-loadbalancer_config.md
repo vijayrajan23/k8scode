@@ -1,3 +1,4 @@
+````
 stream {
     upstream kubernetes {
         server master1.mylap.in:6443;
@@ -9,3 +10,4 @@ stream {
         proxy_pass kubernetes;
     }
 }
+```
