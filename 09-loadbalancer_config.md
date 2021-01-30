@@ -1,4 +1,4 @@
-````
+```
 stream {
     upstream kubernetes {
         server master1.mylap.in:6443;
